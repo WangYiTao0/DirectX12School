@@ -128,10 +128,10 @@ void CCube::Initialized()
 	vertex[21].Position = { -1.0f, 1.0f,  1.0f };
 	vertex[22].Position = { 1.0f, -1.0f, 1.0f };
 	vertex[23].Position = { -1.0f, -1.0f, 1.0f };
-	vertex[20].Normal = { 0.0,1.0,1.0 };
-	vertex[21].Normal = { 0.0,1.0,1.0 };
-	vertex[22].Normal = { 0.0,1.0,1.0 };
-	vertex[23].Normal = { 0.0,1.0,1.0 };
+	vertex[20].Normal = { 0.0,0.0,1.0 };
+	vertex[21].Normal = { 0.0,0.0,1.0 };
+	vertex[22].Normal = { 0.0,0.0,1.0 };
+	vertex[23].Normal = { 0.0,0.0,1.0 };
 	vertex[20].TexCoord = { 0.0,0.0 };
 	vertex[21].TexCoord = { 0.0,1.0 };
 	vertex[22].TexCoord = { 1.0,0.0 };
