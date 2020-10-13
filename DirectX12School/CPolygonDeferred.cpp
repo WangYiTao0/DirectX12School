@@ -1,11 +1,11 @@
-#include "CPolygon.h"
+#include "CPolygonDeferred.h"
 #include "main.h"
 #include "renderer.h"
 
 
 
 
-void CPolygon::Initialized()
+void CPolygonDeferred::Initialized()
 {
 	ComPtr<ID3D12Device> device = CRenderer::GetInstance()->GetDevice();
 
@@ -53,9 +53,9 @@ void CPolygon::Initialized()
 	//assert(SUCCEEDED(hr));
 
 	buffer[0].Position = { 0.0,0.0,0.0 };
-	buffer[1].Position = { 200.0,0.0,0.0 };
-	buffer[2].Position = { 0.0,200.0,0.0 };
-	buffer[3].Position = { 200,200.0,0.0 };
+	buffer[1].Position = { 320.0,0.0,0.0 };
+	buffer[2].Position = { 0.0,240.0,0.0 };
+	buffer[3].Position = { 320,240.0,0.0 };
 	buffer[0].Normal = { 0.0,1.0,0.0 };
 	buffer[1].Normal = { 0.0,1.0,0.0 };
 	buffer[2].Normal = { 0.0,1.0,0.0 };
@@ -67,21 +67,21 @@ void CPolygon::Initialized()
 
 	m_VertexBuffer->Unmap(0, nullptr);
 
-	m_texture = std::make_unique<CTexture>();
-	m_texture->load("data/field004.tga");
+	//m_texture = std::make_unique<CTexture>();
+	//m_texture->load("data/field004.tga");
 }
 
-void CPolygon::UnInitialize()
+void CPolygonDeferred::UnInitialize()
 {
 
 }
 
-void CPolygon::Update()
+void CPolygonDeferred::Update()
 {
 
 }
 
-void CPolygon::Draw(ID3D12GraphicsCommandList* cmdlist)
+void CPolygonDeferred::Draw(ID3D12GraphicsCommandList* cmdlist, ID3D12DescriptorHeap* Texture)
 {
 	HRESULT hr;
 
@@ -97,9 +97,9 @@ void CPolygon::Draw(ID3D12GraphicsCommandList* cmdlist)
 
 	XMFLOAT4X4 matrix;
 	DirectX::XMStoreFloat4x4(&matrix, XMMatrixTranspose(world * view * projection));
-	constant ->WVP = matrix;
+	constant->WVP = matrix;
 	DirectX::XMStoreFloat4x4(&matrix, XMMatrixTranspose(world));
-	constant ->World = matrix;
+	constant->World = matrix;
 
 	m_ConstantBuffer->Unmap(0, nullptr);
 
@@ -113,12 +113,15 @@ void CPolygon::Draw(ID3D12GraphicsCommandList* cmdlist)
 	cmdlist->IASetVertexBuffers(0, 1, &vertexView);
 
 	//テクスチャ設定
-	ID3D12DescriptorHeap* dh[] = { *m_texture->GetSDescriptorHeap().GetAddressOf() };
+	ID3D12DescriptorHeap* dh[] = { Texture };
 	cmdlist->SetDescriptorHeaps(_countof(dh), dh);
-	cmdlist->SetGraphicsRootDescriptorTable(1, m_texture->GetSDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+	cmdlist->SetGraphicsRootDescriptorTable(1,
+		Texture->GetGPUDescriptorHandleForHeapStart());
 
 
 	cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	
 	//描画
 	cmdlist->DrawInstanced(4, 1, 0, 0);
 }

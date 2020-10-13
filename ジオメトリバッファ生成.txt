@@ -1,0 +1,119 @@
+	//ジオメトリバッファ生成
+	{
+		//リソース生成
+		{
+			D3D12_HEAP_PROPERTIES heapProperties{};
+			heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+			heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+			heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+			heapProperties.CreationNodeMask = 0;
+			heapProperties.VisibleNodeMask = 0;
+
+			D3D12_RESOURCE_DESC resourceDesc{};
+			resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+			resourceDesc.Width = m_WindowWidth;
+			resourceDesc.Height = m_WindowHeight;
+			resourceDesc.DepthOrArraySize = 1;
+			resourceDesc.MipLevels = 1;
+			resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+			resourceDesc.SampleDesc.Count = 1;
+			resourceDesc.SampleDesc.Quality = 0;
+			resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+			resourceDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+			D3D12_CLEAR_VALUE clearValue{};
+			clearValue.Color[0] = 0.0f;
+			clearValue.Color[1] = 0.0f;
+			clearValue.Color[2] = 0.0f;
+			clearValue.Color[3] = 1.0f;
+			clearValue.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+
+			hr = m_Device->CreateCommittedResource(&heapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+				&clearValue,
+				IID_PPV_ARGS(&m_NormalResource));
+			assert(SUCCEEDED(hr));
+
+			hr = m_Device->CreateCommittedResource(&heapProperties,
+				D3D12_HEAP_FLAG_NONE,
+				&resourceDesc,
+				D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE,
+				&clearValue,
+				IID_PPV_ARGS(&m_DiffuseResource));
+			assert(SUCCEEDED(hr));
+		}
+
+
+
+
+		{
+			//RTVデスクリプタヒープ
+			D3D12_DESCRIPTOR_HEAP_DESC desc;
+			desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+			desc.NumDescriptors = 2;
+			desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+			desc.NodeMask = 0;
+
+			m_Device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_RTVDesrciptorHeap));
+
+
+
+			//RTV
+			unsigned int size = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			D3D12_CPU_DESCRIPTOR_HANDLE handle = m_RTVDesrciptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+			D3D12_RENDER_TARGET_VIEW_DESC rtDesc = {};
+			rtDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			rtDesc.ViewDimension = D3D12_RTV_DIMENSION::D3D12_RTV_DIMENSION_TEXTURE2D;
+			rtDesc.Texture2D.MipSlice = 0;
+			rtDesc.Texture2D.PlaneSlice = 0;
+
+			m_Device->CreateRenderTargetView(m_NormalResource.Get(), &rtDesc, handle);
+			m_RTHandleGeometry[0] = handle;
+
+			handle.ptr += (size);
+
+			m_Device->CreateRenderTargetView(m_DiffuseResource.Get(), &rtDesc, handle);
+			m_RTHandleGeometry[1] = handle;
+		}
+
+
+
+
+		{
+			//SRVデスクリプタヒープ
+			D3D12_DESCRIPTOR_HEAP_DESC desc;
+			desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+			desc.NumDescriptors = 2;
+			desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+			desc.NodeMask = 0;
+
+			m_Device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_SRVDescriptorHeap));
+
+
+
+
+			//SRV
+			unsigned int size = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			D3D12_CPU_DESCRIPTOR_HANDLE handle = m_SRVDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
+			D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+			srvDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Texture2D.MipLevels = 1;
+			srvDesc.Texture2D.MostDetailedMip = 0;
+			srvDesc.Texture2D.PlaneSlice = 0;
+			srvDesc.Texture2D.ResourceMinLODClamp = 0.0F;
+			srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+			m_Device->CreateShaderResourceView(m_NormalResource.Get(), &srvDesc, handle);
+			handle.ptr += (size);
+
+			m_Device->CreateShaderResourceView(m_DiffuseResource.Get(), &srvDesc, handle);
+
+		}
+
+	}

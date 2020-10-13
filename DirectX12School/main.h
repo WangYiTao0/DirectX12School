@@ -23,8 +23,8 @@ using namespace DirectX;
 #pragma comment (lib, "xaudio2.lib")
 #pragma comment (lib, "dxgi.lib")
 
-#define SCREEN_WIDTH	(960)			// �E�C���h�E�̕�
-#define SCREEN_HEIGHT	(540)			// �E�C���h�E�̍���
+#define SCREEN_WIDTH	(1600)			// �E�C���h�E�̕�
+#define SCREEN_HEIGHT	(900)			// �E�C���h�E�̍���
 
 
 HWND GetWindow();
