@@ -53,9 +53,9 @@ void CPolygonDeferred::Initialized()
 	//assert(SUCCEEDED(hr));
 
 	buffer[0].Position = { 0.0,0.0,0.0 };
-	buffer[1].Position = { 320.0,0.0,0.0 };
-	buffer[2].Position = { 0.0,240.0,0.0 };
-	buffer[3].Position = { 320,240.0,0.0 };
+	buffer[1].Position = { SCREEN_WIDTH,0.0,0.0 };
+	buffer[2].Position = { 0.0,SCREEN_HEIGHT,0.0 };
+	buffer[3].Position = { SCREEN_WIDTH,SCREEN_HEIGHT,0.0 };
 	buffer[0].Normal = { 0.0,1.0,0.0 };
 	buffer[1].Normal = { 0.0,1.0,0.0 };
 	buffer[2].Normal = { 0.0,1.0,0.0 };

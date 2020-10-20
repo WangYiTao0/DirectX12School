@@ -9,18 +9,22 @@ struct PS_INPUT
     float4 Diffuse : COLOR;
 };
 
+struct PS_OUTPUT
+{
+    float4 Normal : SV_TARGET0;
+    float4 Diffuse : SV_TARGET1;
+};
+
 Texture2D<float4> tex0 : register(t0);
 SamplerState spr0 : register(s0);
 
-float4 main(PS_INPUT input) : SV_TARGET
+PS_OUTPUT main(PS_INPUT input) : SV_TARGET
 {
-    float3 lightDirection = float3(1.0, -1.0, 1.0);
-    lightDirection = normalize(lightDirection);
+    PS_OUTPUT output;
     
-    float3 normal = normalize(input.Normal.xyz);
-    float3 light = saturate(-dot(normal, lightDirection));
-    float4 color = tex0.Sample(spr0, input.TexCoord);
-    color.rgb *= light;
+    output.Normal = input.Normal;
+
+    output.Diffuse = tex0.Sample(spr0, input.TexCoord);
     
-    return color;
+    return output;
 }

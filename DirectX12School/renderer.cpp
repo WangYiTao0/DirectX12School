@@ -337,7 +337,7 @@ void CRenderer::Initialize()
 
 
 
-	//�V�O�l�`������
+	//シグネチャー
 	{
 		D3D12_DESCRIPTOR_RANGE		range[1]{};
 		D3D12_ROOT_PARAMETER		root_parameters[2]{};
@@ -353,7 +353,7 @@ void CRenderer::Initialize()
 
 
 
-		range[0].NumDescriptors = 1;
+		range[0].NumDescriptors = 2;
 		range[0].BaseShaderRegister = 0;
 		range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 		range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
@@ -599,7 +599,7 @@ void CRenderer::Initialize()
 		pipeline_state_desc.pRootSignature = m_RootSignature.Get();
 
 
-		//���X�^���C�U�X�e�[�g
+		//RasterizerState
 		pipeline_state_desc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
 		pipeline_state_desc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 		pipeline_state_desc.RasterizerState.FrontCounterClockwise = FALSE;
@@ -612,7 +612,7 @@ void CRenderer::Initialize()
 		pipeline_state_desc.RasterizerState.MultisampleEnable = FALSE;
 
 
-		//�u�����h�X�e�[�g
+		//BlendState
 		for (int i = 0; i < _countof(pipeline_state_desc.BlendState.RenderTarget); ++i)
 		{
 			pipeline_state_desc.BlendState.RenderTarget[i].BlendEnable = FALSE;
@@ -630,7 +630,7 @@ void CRenderer::Initialize()
 		pipeline_state_desc.BlendState.IndependentBlendEnable = FALSE;
 
 
-		//�f�v�X�E�X�e���V���X�e�[�g
+		//DepthStencilState
 		pipeline_state_desc.DepthStencilState.DepthEnable = TRUE;
 		pipeline_state_desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		pipeline_state_desc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
@@ -651,7 +651,8 @@ void CRenderer::Initialize()
 		pipeline_state_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
 
-		hr = m_Device->CreateGraphicsPipelineState(&pipeline_state_desc, IID_PPV_ARGS(&m_PipelineStateGeometry));
+		hr = m_Device->CreateGraphicsPipelineState(&pipeline_state_desc,
+			IID_PPV_ARGS(&m_PipelineStateGeometry));
 		ThrowIfFailed(hr);
 	}
 
@@ -759,7 +760,7 @@ void CRenderer::Initialize()
 		pipeline_state_desc.BlendState.IndependentBlendEnable = FALSE;
 
 
-		//�f�v�X�E�X�e���V���X�e�[�g
+		//DepthStencilState
 		pipeline_state_desc.DepthStencilState.DepthEnable = TRUE;
 		pipeline_state_desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		pipeline_state_desc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
@@ -780,7 +781,8 @@ void CRenderer::Initialize()
 		pipeline_state_desc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 
 
-		hr = m_Device->CreateGraphicsPipelineState(&pipeline_state_desc, IID_PPV_ARGS(&m_PipelineStateLight));
+		hr = m_Device->CreateGraphicsPipelineState(&pipeline_state_desc,
+			IID_PPV_ARGS(&m_PipelineStateLight));
 		ThrowIfFailed(hr);
 	}
 
@@ -804,7 +806,7 @@ void CRenderer::Draw()
 	HRESULT hr;
 
 
-	FLOAT clearColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+	FLOAT clearColor[4] = { 0.3f, 0.3f, 0.3f, 1.0f };
 
 	////リソースの状態をプレゼント用からレンダーターゲット用に変更
 	//SetResourceBarrier(D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -823,7 +825,7 @@ void CRenderer::Draw()
 	m_GraphicsCommandList->ClearRenderTargetView(m_RTHandleGeometry[1], clearColor, 0, nullptr);
 
 
-	//PSO rootsignature
+	//Set PSO rootsignature
 	m_GraphicsCommandList->SetGraphicsRootSignature(m_RootSignature.Get());
 	m_GraphicsCommandList->SetPipelineState(m_PipelineStateGeometry.Get());
 
@@ -835,7 +837,7 @@ void CRenderer::Draw()
 	//rendertarget
 	//m_GraphicsCommandList->OMSetRenderTargets(1, &m_RTHandle[m_RTIndex], TRUE, &m_DSHandle);
 
-	m_GraphicsCommandList->OMSetRenderTargets(1, m_RTHandleGeometry, TRUE, &m_DSHandle);
+	m_GraphicsCommandList->OMSetRenderTargets(2, m_RTHandleGeometry, TRUE, &m_DSHandle);
 
 	m_Field->Draw(m_GraphicsCommandList.Get());
 	m_Polygon->Draw(m_GraphicsCommandList.Get());
@@ -940,6 +942,20 @@ void CRenderer::SetResourceBarrierGeometry(D3D12_RESOURCE_STATES BeforeState, D3
 	resourceBarrier[1].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	resourceBarrier[1].Transition.StateBefore = BeforeState;
 	resourceBarrier[1].Transition.StateAfter = AfterState;
+
+	//resourceBarrier[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	//resourceBarrier[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	//resourceBarrier[1].Transition.pResource = m_PositionResource.Get();
+	//resourceBarrier[1].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	//resourceBarrier[1].Transition.StateBefore = BeforeState;
+	//resourceBarrier[1].Transition.StateAfter = AfterState;
+
+	//resourceBarrier[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	//resourceBarrier[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	//resourceBarrier[1].Transition.pResource = m_DepthResource.Get();
+	//resourceBarrier[1].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	//resourceBarrier[1].Transition.StateBefore = BeforeState;
+	//resourceBarrier[1].Transition.StateAfter = AfterState;
 
 	m_GraphicsCommandList->ResourceBarrier(2, resourceBarrier);
 }
