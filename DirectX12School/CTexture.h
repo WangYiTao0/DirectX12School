@@ -10,6 +10,9 @@ private:
 	ComPtr<ID3D12DescriptorHeap> m_DescriptorHeap;
 
 public:
+	CTexture() = default;
+	CTexture(ComPtr<ID3D12DescriptorHeap> descriptorheap);
+	
 	void load(const char* FileName);
 
 	ComPtr<ID3D12DescriptorHeap> GetSDescriptorHeap()

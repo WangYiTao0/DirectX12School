@@ -2,6 +2,13 @@
 #include "renderer.h"
 
 
+CTexture::CTexture(ComPtr<ID3D12DescriptorHeap> descriptorheap)
+	:
+	m_DescriptorHeap(descriptorheap)
+{
+
+}
+
 void CTexture::load(const char* FileName)
 {
 	unsigned char header[18];

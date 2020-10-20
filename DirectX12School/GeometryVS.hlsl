@@ -18,6 +18,7 @@ struct PS_INPUT
     float4 Normal : NORMAL;
     float2 TexCoord : TEXCOORD;
     float4 Diffuse : COLOR;
+    float4 WorldPosition: POSITION;
 };
 
 
@@ -35,6 +36,10 @@ PS_INPUT main(VS_INPUT input)
     
     output.Diffuse.rgb = 1.0;
     output.Diffuse.a = 1.0;
+    
+    output.WorldPosition = mul(position, World);
+    
+    output.WorldPosition.w = output.Position.z / 20.0;
     
     return output;
 }
