@@ -23,22 +23,26 @@ float4 main(PS_INPUT input) : SV_TARGET
     float3 cameraPos = float3(0.0, 0.0, -5.0);
     
    
-    float4 n = NorTex.Sample(spr0, input.TexCoord);
+    float4 normal = NorTex.Sample(spr0, input.TexCoord);
     float4 diffuseColor = DifTex.Sample(spr0, input.TexCoord);
     float4 worldPos = PosTex.Sample(spr0, input.TexCoord);
-    float depth = DepthTex.Sample(spr0, input.TexCoord).r;
+    float4 depth = DepthTex.Sample(spr0, input.TexCoord);
     
-    float light = saturate(0.5 - dot(n.rgb, lightDirection) * 0.5);
+    float light = saturate(0.5 - dot(normal.rgb, lightDirection) * 0.5);
     diffuseColor.rgb *= light;
     
     float3 eye = worldPos.xyz - cameraPos;
-    float3 ref = reflect(eye, n.xyz);
+    float3 ref = reflect(eye, normal.xyz);
     ref = normalize(ref);
     float spec = -dot(ref, lightDirection);
     spec = saturate(spec);
     spec = pow(spec, 20.0);
     
     diffuseColor.rgb += spec;
+    
+    float3 fogColor = float3(1.0, 1.0, 1.0);
+    float fog = depth.x;
+    diffuseColor.rgb = diffuseColor.rgb * (1.0 - fog) + fogColor * fog;
     
     return diffuseColor;
    // float3 viewDir = normalize(cameraPos - worldPos.xyz);
